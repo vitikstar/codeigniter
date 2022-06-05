@@ -1,0 +1,52 @@
+# Пропишем версию
+version: '3.3'
+# Перечислим сервисы
+services:
+    web:
+# Пропишем какой образ мы хотим использовать
+        build: 
+          context: ./docker/nginx
+# Назовем свой контейнер по красивому
+        container_name: web
+        tty: true
+# Проброс портов
+        ports:
+            - "80:80"
+# Проброс папок
+        volumes:
+            - ./:/var/www/
+            - ./docker/logs/nginx:/var/log/nginx/
+            - ./docker/logs/mysql:/var/log/mysql/
+            - ./docker/nginx/vhost/default.conf:/etc/nginx/sites-available/default
+    mysql:
+        build: 
+          context: ./docker/mysql
+        tty: true
+        ports:
+            - "3306:3306"
+        container_name: mysql
+        environment:
+
+            - MYSQL_ROOT_PASSWORD=root
+            - MYSQL_DATABASE=main
+            - MYSQL_USER=viktor
+            - MYSQL_PASSWORD=viktor
+
+
+        volumes:
+            - ./docker/mysql:/var/lib/mysql
+            - ./docker/mysql/dump/:/var
+            # - ./docker/mysql/config/my.cnf:/etc/mysql/my.cnf
+
+    phpmyadmin:
+        build: 
+          context: ./docker/phpmyadmin
+
+        container_name: phpmyadmin
+
+        ports:
+
+            - 8090:80
+            
+        volumes:
+              - ./docker/mysql/config/.htaccess:/var/www/html/.htaccess
